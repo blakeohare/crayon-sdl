@@ -3,7 +3,7 @@ import sys
 import shutil
 
 def main(args):
-    cs_dir = os.path.join('output', 'csharp', 'NativeTest')
+    cs_dir = os.path.join('output', 'csharp', 'SdlDemo')
     assets_dir = os.path.join('assets', 'csharp')
 
     include_bridge = len(args) == 1 and args[0] == 'full'

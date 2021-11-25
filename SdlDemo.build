@@ -1,0 +1,20 @@
+﻿{
+    "id": "SdlDemo",
+    "source": "source/",
+    "output": "output/%TARGET_NAME%",
+    "title": "SdlDemo",
+    "icons": [
+        "assets/icon32.png",
+        "assets/icon256.png"
+    ],
+    "version": "1.0",
+    "iosBundlePrefix": "com.yourname.SdlDemo,%VERSION%",
+    "guidSeed": "com.yourname.SdlDemo,v1,%TARGET_NAME%",
+
+    "targets": [
+        {
+            "name": "csharp",
+            "platform": "csharp-app"
+        }
+    ]
+}

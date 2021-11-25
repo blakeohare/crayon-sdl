@@ -33,7 +33,6 @@ namespace Sdl {
     function pollEvents() {
         args = _await_send_native_message('sdl-poll-events', []);
         events = [];
-        print("POLL EVENTS: " + args + " | " + args.length);
         for (i = 0; i < args.length; i += 2) {
             events.add(new SdlEvent(args[i], args[i + 1]));
         }
