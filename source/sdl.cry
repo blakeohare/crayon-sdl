@@ -1,0 +1,91 @@
+import Math;
+import NativeTunnel;
+
+namespace Sdl {
+    function _send_native_message(type, args, cb) {
+
+        NativeTunnel.Tunnel.send(type, args.join(','), response => {
+            responseArgs = response == '' ? [] : response.split(',');
+            cb(responseArgs);
+        });
+    }
+
+    function _await_send_native_message(type, args) {
+        waiting = true;
+        output = null;
+        _send_native_message(type, args, response => {
+            waiting = false;
+            output = response;
+        });
+
+        while (waiting) {
+            sleep(0.001);
+            NativeTunnel.Tunnel.flushRecvQueue();
+        }
+
+        return output;
+    }
+
+    function initialize() {
+        _await_send_native_message('sdl-init', []);
+    }
+
+    function pollEvents() {
+        args = _await_send_native_message('sdl-poll-events', []);
+        events = [];
+        print("POLL EVENTS: " + args + " | " + args.length);
+        for (i = 0; i < args.length; i += 2) {
+            events.add(new SdlEvent(args[i], args[i + 1]));
+        }
+        return events;
+    }
+
+    enum SdlEventType {
+        QUIT,
+        KEY_UP,
+        KEY_DOWN,
+    }
+
+    class SdlEvent {
+        field type; // QUIT | KEYUP | KEYDOWN
+        field key;
+
+        constructor(type, key) {
+            switch (type) {
+                case 'quit': this.type = SdlEventType.QUIT; break;
+                case 'keyup': this.type = SdlEventType.KEY_UP; break;
+                case 'keydown': this.type = SdlEventType.KEY_DOWN; break;
+            }
+            this.key = key;
+        }
+    }
+
+    class SdlWindow {
+        field _handle;
+        field width;
+        field height;
+        field title;
+        field surface;
+
+        constructor(title, width, height) {
+            this.title = title;
+            this.width = width;
+            this.height = height;
+        }
+
+        function show() {
+            args = _await_send_native_message('sdl-create-window', [Math.max(100, this.width), Math.max(100, this.height), this.title + '']);
+            this._handle = parseInt(args[0]);
+            this.surface = new SdlSurface(parseInt(args[1]));
+            return this;
+        }
+    }
+
+    class SdlSurface {
+        field _handle;
+
+        constructor(handle) {
+            this._handle = handle;
+        }
+    }
+}

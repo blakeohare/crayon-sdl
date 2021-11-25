@@ -1,0 +1,29 @@
+﻿function main(args) {
+	print("Hello, World!");
+
+	Sdl.initialize();
+
+	window = new Sdl.SdlWindow("My SDL Window, but like in Crayon!", 640, 480);
+
+	screen = window.surface;
+
+	window.show();
+
+	while (true) {
+		events = Sdl.pollEvents();
+
+		for (event : events) {
+			switch (event.type) {
+				case Sdl.SdlEventType.KEY_DOWN:
+					print("You pushed the key: " + event.key);
+					break;
+				case Sdl.SdlEventType.KEY_UP:
+					print("You pushed the key: " + event.key);
+					break;
+				case Sdl.SdlEventType.QUIT:
+					print("Goodbye!");
+					return;
+			}
+		}
+	}
+}
