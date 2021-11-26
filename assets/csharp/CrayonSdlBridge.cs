@@ -40,7 +40,63 @@ namespace Interpreter
                 case "sdl-poll-events":
                     return new PollEvent();
 
+                case "sdl-draw-rect":
+                    return new DrawRect(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]), int.Parse(args[3]), int.Parse(args[4]), int.Parse(args[5]), int.Parse(args[6]), int.Parse(args[7]), int.Parse(args[8]));
+
+                case "sdl-render-present":
+                    return new RenderPresent(int.Parse(args[0]));
+
                 default: return null;
+            }
+        }
+
+        private class RenderPresent : AbstractSdlAction
+        {
+            private IntPtr renderer;
+
+            public RenderPresent(int rendererId)
+            {
+                this.renderer = nativePtrs[rendererId];
+            }
+
+            public override void Run()
+            {
+                SDL2.SDL.SDL_RenderPresent(this.renderer);
+                this.MarkAsCompleted();
+            }
+        }
+
+        private class DrawRect : AbstractSdlAction
+        {
+            private int x;
+            private int y;
+            private int width;
+            private int height;
+            private byte red;
+            private byte green;
+            private byte blue;
+            private byte alpha;
+            private IntPtr renderer;
+
+            public DrawRect(int rendererId, int x, int y, int width, int height, int red, int green, int blue, int alpha)
+            {
+                this.renderer = nativePtrs[rendererId];
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.red = (byte)red;
+                this.green = (byte)green;
+                this.blue = (byte)blue;
+                this.alpha = (byte)alpha;
+            }
+
+            public override void Run()
+            {
+                SDL2.SDL.SDL_SetRenderDrawColor(this.renderer, this.red, this.green, this.blue, this.alpha);
+                SDL2.SDL.SDL_Rect rect = new SDL2.SDL.SDL_Rect() { x = this.x, y = this.y, w = this.width, h = this.height };
+                SDL2.SDL.SDL_RenderDrawRect(this.renderer, ref rect);
+                this.MarkAsCompleted();
             }
         }
 
@@ -65,6 +121,7 @@ namespace Interpreter
                 this.width = width;
                 this.height = height;
             }
+
             public override void Run()
             {
                 IntPtr window = SDL2.SDL.SDL_CreateWindow(
