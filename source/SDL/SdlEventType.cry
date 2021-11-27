@@ -1,0 +1,8 @@
+namespace Sdl {
+
+    enum SdlEventType {
+        QUIT,
+        KEY_UP,
+        KEY_DOWN,
+    }
+}

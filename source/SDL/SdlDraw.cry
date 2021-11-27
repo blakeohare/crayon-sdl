@@ -1,0 +1,15 @@
+namespace Sdl {
+
+    static class SdlDraw {
+
+        static function rect(surface, x, y, width, height, r, g, b, a = 255) {
+            _send_native_message('sdl-draw-rect', [
+                surface._handle,
+                surface._pixelFormat,
+                x, y,
+                width, height, 
+                r, g, b, a
+            ]);
+        }
+    }
+}

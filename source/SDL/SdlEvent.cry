@@ -1,0 +1,25 @@
+namespace Sdl {
+
+    function pollEvents() {
+        args = _await_send_native_message('sdl-poll-events', []);
+        events = [];
+        for (i = 0; i < args.length; i += 2) {
+            events.add(new SdlEvent(args[i], args[i + 1]));
+        }
+        return events;
+    }
+
+    class SdlEvent {
+        field type; // QUIT | KEYUP | KEYDOWN
+        field key;
+
+        constructor(type, key) {
+            switch (type) {
+                case 'quit': this.type = SdlEventType.QUIT; break;
+                case 'keyup': this.type = SdlEventType.KEY_UP; break;
+                case 'keydown': this.type = SdlEventType.KEY_DOWN; break;
+            }
+            this.key = parseInt(key);
+        }
+    }
+}

@@ -1,0 +1,81 @@
+import Images;
+
+namespace Sdl {
+
+    class SdlSurface {
+        field _handle;
+        field _pixelFormat;
+        field width;
+        field height;
+
+        @private
+        constructor(handle, pixelFormat, width, height) {
+            this._handle = handle;
+            this._pixelFormat = pixelFormat;
+            this.width = width;
+            this.height = height;
+        }
+
+        function blit(destinationSurface, x, y) {
+            w = this.width;
+            h = this.height;
+            _send_native_message('sdl-surface-blit', [
+                this._handle,
+                0, 0, w, h,
+                destinationSurface._handle,
+                x, y, w, h,
+            ]);
+            return this;
+        }
+
+        function blitAdvanced(srcX, srcY, srcWidth, srcHeight, destinationSurface, dstX, dstY, dstWidth, dstHeight) {
+            _send_native_message('sdl-surface-blit', [
+                this._handle,
+                srcX, srcY, srcWidth, srcHeight,
+                destinationSurface._handle,
+                dstX, dstY, dstWidth, dstHeight,
+            ]);
+            return this;
+        }
+
+        function convertToWindowFormat(window) {
+            if (!(window is SdlWindow)) {
+                throw new InvalidArgumentException();
+            }
+
+            response = _await_send_native_message('sdl-convert-surface-format', [
+                this._handle, 
+                window._handle, 
+                0 // TODO: handle arbitrary pixel formats
+            ]);
+            return new SdlSurface(parseInt(response[0]), response[1], this.width, this.height);
+        }
+
+        static field _imageDataByPath = {};
+
+        static function _getImageData(path) {
+            imageData = SdlSurface._imageDataByPath.get(path);
+            if (imageData == null) {
+                bmp = Images.Bitmap.fromResource(path);
+                imageData = {
+                    'b64': bmp.toBase64(ImageFormat.PNG),
+                    'width': bmp.width,
+                    'height': bmp.height,
+                };
+                SdlSurface._imageDataByPath[path] = imageData;
+            }
+            return imageData;
+        }
+
+        static function _fromArgs(handle, pixelFormat, width, height) {
+            return new SdlSurface(handle, pixelFormat, width, height);
+        }
+
+        static function loadResource(path) {
+            imageData = SdlSurface._getImageData(path);
+            args = _await_send_native_message('sdl-load-image', [imageData['b64']]);
+            surface = new SdlSurface(parseInt(args[0]), args[1], imageData['width'], imageData['height']);
+            return surface;
+        }
+    }
+}

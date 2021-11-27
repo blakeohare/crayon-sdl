@@ -8,28 +8,40 @@
 
 	sprite = Sdl.SdlSurface.loadResource('images/sprite.png').convertToWindowFormat(window);
 
+	keysPushed = {};
+	keysPushed[0] = false;
+
+	x = 0;
+	y = 0;
+
 	while (true) {
 		frameBeginTimestamp = Core.currentTime();
 		events = Sdl.pollEvents();
 
 		for (event : events) {
-			switch (event.type) {
+
+			switch (parseInt(event.type + '')) {
 				case Sdl.SdlEventType.KEY_DOWN:
-					print("You pushed the key: " + event.key);
+					keysPushed[event.key] = true;
 					break;
 				case Sdl.SdlEventType.KEY_UP:
-					print("You released the key: " + event.key);
+					keysPushed[event.key] = false;
 					break;
 				case Sdl.SdlEventType.QUIT:
-					print("Goodbye!");
 					return;
 			}
 		}
 		
-		Sdl.SdlDraw.rect(window.surface, 0, 0, 200, 200, 0, 0, 0);
+		velocity = 3;
+		if (keysPushed.get(Sdl.SdlKey.LEFT, false)) x -= velocity;
+		else if (keysPushed.get(Sdl.SdlKey.RIGHT, false)) x += velocity;
+		if (keysPushed.get(Sdl.SdlKey.UP, false)) y -= velocity;
+		else if (keysPushed.get(Sdl.SdlKey.DOWN, false)) y += velocity;
+
+		window.fill(0, 0, 0);
 		Sdl.SdlDraw.rect(window.surface, 10, 10, 20, 30, 255, 0, 0);
 
-		sprite.blit(window.surface, 60, 100);
+		sprite.blit(window.surface, x, y);
 		sprite.blitAdvanced(20, 20, 60, 60, window.surface, 300, 10, 200, 30);
 
 		window.present();

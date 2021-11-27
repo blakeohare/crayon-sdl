@@ -1,0 +1,32 @@
+import NativeTunnel;
+
+namespace Sdl {
+    function _send_native_message(type, args, cb = null) {
+
+        NativeTunnel.Tunnel.send(type, args.join(','), response => {
+            if (cb == null) return;
+            responseArgs = response == '' ? [] : response.split(',');
+            cb(responseArgs);
+        });
+    }
+
+    function _await_send_native_message(type, args) {
+        waiting = true;
+        output = null;
+        _send_native_message(type, args, response => {
+            waiting = false;
+            output = response;
+        });
+
+        while (waiting) {
+            sleep(0.001);
+            NativeTunnel.Tunnel.flushRecvQueue();
+        }
+
+        return output;
+    }
+
+    function initialize() {
+        _await_send_native_message('sdl-init', []);
+    }
+}

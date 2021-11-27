@@ -1,0 +1,38 @@
+import Math;
+
+namespace Sdl {
+
+    class SdlWindow {
+        field _handle;
+        field _rendererHandle;
+        field width;
+        field height;
+        field title;
+        field surface;
+
+        constructor(title, width, height) {
+            this.title = title;
+            this.width = width;
+            this.height = height;
+        }
+
+        function show() {
+            args = _await_send_native_message('sdl-create-window', [Math.max(100, this.width), Math.max(100, this.height), this.title + '']);
+            this._handle = parseInt(args[0]);
+            this.surface = SdlSurface._fromArgs(parseInt(args[1]), args[3], this.width, this.height);
+            this._rendererHandle = parseInt(args[2]);
+            return this;
+        }
+
+        function fill(r, g, b) {
+            SdlDraw.rect(this.surface, 0, 0, this.width, this.height, r, g, b);
+            return this;
+        }
+
+        function present() {
+            _send_native_message('sdl-render-present', [this._handle, this._rendererHandle]);
+            return this;
+        }
+    }
+
+}
