@@ -10,6 +10,7 @@
     <EmbeddedResource Include="Resources\ByteCode.txt" />
     <EmbeddedResource Include="Resources\ResourceManifest.txt" />
     <EmbeddedResource Include="Resources\ImageManifest.txt" />
+    <EmbeddedResource Include="Resources\*.png" />
     <EmbeddedResource Include="icon.ico" />
   </ItemGroup>
 
@@ -19,6 +20,24 @@
 
   <ItemGroup>
     <None Update="SDL2.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libjpeg-9.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libpng16-16.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libtiff-5.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="libwebp-7.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SDL2_image.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="zlib1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

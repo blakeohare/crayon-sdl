@@ -18,6 +18,12 @@ def main(args):
         'SDL2_ttf.cs',
         'SDL2.cs',
         'SDL2.dll',
+        'libjpeg-9.dll',
+        'libpng16-16.dll',
+        'libtiff-5.dll',
+        'libwebp-7.dll',
+        'SDL2_image.dll',
+        'zlib1.dll',
     ]:
         if file != 'CrayonSdlBridge.cs' or include_bridge:
             shutil.copyfile(os.path.join(assets_dir, file), os.path.join(cs_dir, file))

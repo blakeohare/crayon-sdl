@@ -46,7 +46,63 @@ namespace Interpreter
                 case "sdl-render-present":
                     return new RenderPresent(int.Parse(args[0]));
 
+                case "sdl-load-image":
+                    return new LoadImage(System.Convert.FromBase64String(args[0]));
+
+                case "sdl-surface-blit":
+                    return new BlitSurface(int.Parse(args[0]), int.Parse(args[1]), int.Parse(args[2]), int.Parse(args[3]), int.Parse(args[4]), int.Parse(args[5]), int.Parse(args[6]), int.Parse(args[7]), int.Parse(args[8]), int.Parse(args[9]));
+
                 default: return null;
+            }
+        }
+
+        private class BlitSurface : AbstractSdlAction
+        {
+            private IntPtr srcSurface;
+            private IntPtr dstSurface;
+            private SDL2.SDL.SDL_Rect srcRect;
+            private SDL2.SDL.SDL_Rect dstRect;
+
+            public BlitSurface(int srcId, int srcX, int srcY, int srcWidth, int srcHeight, int dstId, int dstX, int dstY, int dstWidth, int dstHeight)
+            {
+                this.srcSurface = nativePtrs[srcId];
+                this.dstSurface = nativePtrs[dstId];
+                this.srcRect.x = srcX;
+                this.srcRect.y = srcY;
+                this.srcRect.w = srcWidth;
+                this.srcRect.h = srcHeight;
+                this.dstRect.x = dstX;
+                this.dstRect.y = dstY;
+                this.dstRect.w = dstWidth;
+                this.dstRect.h = dstHeight;
+            }
+
+            public override void Run()
+            {
+                SDL2.SDL.SDL_BlitSurface(this.srcSurface, ref this.srcRect, this.dstSurface, ref this.dstRect);
+                this.MarkAsCompleted();
+            }
+        }
+
+        private class LoadImage : AbstractSdlAction
+        {
+            private byte[] imageBytes;
+
+            public LoadImage(byte[] imageBytes)
+            {
+                this.imageBytes = imageBytes;
+            }
+
+            public override void Run()
+            {
+                int size = this.imageBytes.Length;
+                IntPtr imageData = System.Runtime.InteropServices.Marshal.AllocHGlobal(size);
+                System.Runtime.InteropServices.Marshal.Copy(this.imageBytes, 0, imageData, size);
+                IntPtr imageDataMemStream = SDL2.SDL.SDL_RWFromMem(imageData, size);
+                IntPtr surfaceHandle = SDL2.SDL_image.IMG_Load_RW(imageDataMemStream, 0);
+                System.Runtime.InteropServices.Marshal.FreeHGlobal(imageData);
+                int surfaceId = PtrToInt(surfaceHandle);
+                this.MarkAsCompleted(new string[] { surfaceId + "" });
             }
         }
 
@@ -95,7 +151,8 @@ namespace Interpreter
             {
                 SDL2.SDL.SDL_SetRenderDrawColor(this.renderer, this.red, this.green, this.blue, this.alpha);
                 SDL2.SDL.SDL_Rect rect = new SDL2.SDL.SDL_Rect() { x = this.x, y = this.y, w = this.width, h = this.height };
-                SDL2.SDL.SDL_RenderDrawRect(this.renderer, ref rect);
+                SDL2.SDL.SDL_RenderFillRect(this.renderer, ref rect);
+
                 this.MarkAsCompleted();
             }
         }

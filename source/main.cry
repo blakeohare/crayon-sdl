@@ -8,6 +8,8 @@
 
 	window.show();
 
+	sprite = Sdl.SdlSurface.loadResource('images/sprite.png');
+
 	while (true) {
 		frameBeginTimestamp = Core.currentTime();
 		events = Sdl.pollEvents();
@@ -28,6 +30,8 @@
 		
 		Sdl.SdlDraw.rect(window, 0, 0, 200, 200, 0, 0, 0);
 		Sdl.SdlDraw.rect(window, 10, 10, 20, 30, 255, 0, 0);
+
+		sprite.blit(window, 60, 100);
 
 		window.present();
 
