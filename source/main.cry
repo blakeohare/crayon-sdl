@@ -4,11 +4,9 @@
 
 	window = new Sdl.SdlWindow("My SDL Window, but like in Crayon!", 640, 480);
 
-	screen = window.surface;
-
 	window.show();
 
-	sprite = Sdl.SdlSurface.loadResource('images/sprite.png');
+	sprite = Sdl.SdlSurface.loadResource('images/sprite.png').convertToWindowFormat(window);
 
 	while (true) {
 		frameBeginTimestamp = Core.currentTime();
@@ -28,10 +26,11 @@
 			}
 		}
 		
-		Sdl.SdlDraw.rect(window, 0, 0, 200, 200, 0, 0, 0);
-		Sdl.SdlDraw.rect(window, 10, 10, 20, 30, 255, 0, 0);
+		Sdl.SdlDraw.rect(window.surface, 0, 0, 200, 200, 0, 0, 0);
+		Sdl.SdlDraw.rect(window.surface, 10, 10, 20, 30, 255, 0, 0);
 
-		sprite.blit(window, 60, 100);
+		sprite.blit(window.surface, 60, 100);
+		sprite.blitAdvanced(20, 20, 60, 60, window.surface, 300, 10, 200, 30);
 
 		window.present();
 

@@ -78,39 +78,64 @@ namespace Sdl {
         function show() {
             args = _await_send_native_message('sdl-create-window', [Math.max(100, this.width), Math.max(100, this.height), this.title + '']);
             this._handle = parseInt(args[0]);
-            this.surface = SdlSurface._fromArgs(parseInt(args[1]), this.width, this.height);
+            this.surface = SdlSurface._fromArgs(parseInt(args[1]), args[3], this.width, this.height);
             this._rendererHandle = parseInt(args[2]);
             return this;
         }
 
         function present() {
-            _send_native_message('sdl-render-present', [this._rendererHandle]);
+            _send_native_message('sdl-render-present', [this._handle, this._rendererHandle]);
             return this;
         }
     }
 
     class SdlSurface {
         field _handle;
+        field _pixelFormat;
         field width;
         field height;
 
         @private
-        constructor(handle, width, height) {
+        constructor(handle, pixelFormat, width, height) {
             this._handle = handle;
+            this._pixelFormat = pixelFormat;
             this.width = width;
             this.height = height;
         }
 
-        function blit(surfaceOrWindow, x, y) {
+        function blit(destinationSurface, x, y) {
             w = this.width;
             h = this.height;
             _send_native_message('sdl-surface-blit', [
                 this._handle,
                 0, 0, w, h,
-                surfaceOrWindow is SdlWindow ? surfaceOrWindow.surface._handle : surfaceOrWindow._handle,
+                destinationSurface._handle,
                 x, y, w, h,
             ]);
             return this;
+        }
+
+        function blitAdvanced(srcX, srcY, srcWidth, srcHeight, destinationSurface, dstX, dstY, dstWidth, dstHeight) {
+            _send_native_message('sdl-surface-blit', [
+                this._handle,
+                srcX, srcY, srcWidth, srcHeight,
+                destinationSurface._handle,
+                dstX, dstY, dstWidth, dstHeight,
+            ]);
+            return this;
+        }
+
+        function convertToWindowFormat(window) {
+            if (!(window is SdlWindow)) {
+                throw new InvalidArgumentException();
+            }
+
+            response = _await_send_native_message('sdl-convert-surface-format', [
+                this._handle, 
+                window._handle, 
+                0 // TODO: handle arbitrary pixel formats
+            ]);
+            return new SdlSurface(parseInt(response[0]), response[1], this.width, this.height);
         }
 
         static field _imageDataByPath = {};
@@ -129,23 +154,24 @@ namespace Sdl {
             return imageData;
         }
 
-        static function _fromArgs(handle, width, height) {
-            return new SdlSurface(handle, width, height);
+        static function _fromArgs(handle, pixelFormat, width, height) {
+            return new SdlSurface(handle, pixelFormat, width, height);
         }
 
         static function loadResource(path) {
             imageData = SdlSurface._getImageData(path);
             args = _await_send_native_message('sdl-load-image', [imageData['b64']]);
-            surface = new SdlSurface(parseInt(args[0]), imageData['width'], imageData['height']);
+            surface = new SdlSurface(parseInt(args[0]), args[1], imageData['width'], imageData['height']);
             return surface;
         }
     }
 
     static class SdlDraw {
 
-        static function rect(surfaceOrWindow, x, y, width, height, r, g, b, a = 255) {
+        static function rect(surface, x, y, width, height, r, g, b, a = 255) {
             _send_native_message('sdl-draw-rect', [
-                surfaceOrWindow is SdlWindow ? surfaceOrWindow._rendererHandle : null,
+                surface._handle,
+                surface._pixelFormat,
                 x, y,
                 width, height, 
                 r, g, b, a
