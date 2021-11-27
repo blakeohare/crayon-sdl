@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Interpreter
 {
@@ -25,7 +24,7 @@ namespace Interpreter
                 InboundPayload = request[1].ToString()
             };
             this.messages.Add(message);
-            AbstractSdlAction action =  CrayonSdlBridge.CreateSdlAction(message, message.InboundPayload.Split(','));
+            AbstractSdlAction action = CrayonSdlBridge.CreateSdlAction(message, message.InboundPayload.Split(','));
             if (action == null)
             {
                 message.NotRegistered = true;
@@ -41,7 +40,7 @@ namespace Interpreter
         private int nextMessageId = 1;
         private List<NativeTunnelMessageWrapper> messages = new List<NativeTunnelMessageWrapper>();
 
-        private object HandleSdlFlush(object[] what)
+        private object HandleSdlFlush(object[] dataOut)
         {
             for (int i = 0; i < this.messages.Count; i++)
             {
@@ -49,10 +48,10 @@ namespace Interpreter
                 if (message.IsCompleted)
                 {
                     this.messages.RemoveAt(i);
-                    what[0] = message.ID;
-                    what[1] = message.IsCompleted ? 1 : message.NotRegistered ? 2 : 0;
-                    what[2] = message.OutboundPayload;
-                    what[3] = false;
+                    dataOut[0] = message.ID;
+                    dataOut[1] = message.IsCompleted ? 1 : message.NotRegistered ? 2 : 0;
+                    dataOut[2] = message.OutboundPayload;
+                    dataOut[3] = false;
                     return true;
                 }
             }
